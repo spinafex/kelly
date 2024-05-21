@@ -1,0 +1,56 @@
+# W = Probability of winning
+# R = Odds ratio 
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def kelly_criterion(W, R):
+    """
+    Calculates the optimal bet size (f*) using the Kelly criterion formula.
+    """
+    f_star = (W - (1 - W) / R)
+    return f_star
+
+def expected_growth_rate(W, R, f):
+    """
+    Calculates the expected logarithmic growth rate (g) for a given bet size (f).
+    """
+    g = W * np.log(1 + f * R) + (1 - W) * np.log(1 - f)
+    return g
+
+# Define a range of values for W and R
+W_values = np.linspace(0.1, 0.9, 9)
+R_values = np.linspace(1.1, 5, 10)
+
+# Create a figure and axis
+fig, ax = plt.subplots(figsize=(8, 6))
+
+# Loop over W and R values
+for W in W_values:
+    for R in R_values:
+        # Calculate the optimal bet size (f*) using the Kelly criterion
+        f_star = kelly_criterion(W, R)
+
+        # Calculate the expected growth rate (g) for a range of bet sizes
+        f_range = np.linspace(0, 1, 100)
+        g_values = [expected_growth_rate(W, R, f) for f in f_range]
+
+        # Find the indices where g is greater than zero
+        positive_g_indices = [i for i, g in enumerate(g_values) if g > 0]
+        positive_f_range = [f_range[i] for i in positive_g_indices]
+        positive_g_values = [g_values[i] for i in positive_g_indices]
+
+        # Plot the expected growth rate (g) versus the bet size (f) for positive g values
+        ax.plot(positive_f_range, positive_g_values, label=f"W={W:.2f}, R={R:.2f}")
+
+        # Mark the optimal bet size (f*) on the plot
+        ax.axvline(f_star, linestyle='--', color='k', alpha=0.3)
+
+# Add labels and title
+ax.set_xlabel("Bet Size (f)")
+ax.set_ylabel("Expected Growth Rate (g)")
+ax.set_title("Expected Growth Rate vs. Optimal Bet Size (g > 0)")
+ax.legend()
+
+# Show the plot
+plt.show()
